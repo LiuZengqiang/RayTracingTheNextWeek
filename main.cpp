@@ -30,7 +30,10 @@ int main() {
           // diffuse, 漫反射材质, 反射光线在交点法线方向存在散射(漫反射)和衰减
           auto albedo = color::random() * color::random();
           sphere_material = make_shared<lambertian>(albedo);
-          world.add(make_shared<sphere>(center, 0.2, sphere_material));
+          // 增加可以移动的球
+          auto center2 = center + vec3(0, random_double(0, 0.5), 0);
+          world.add(make_shared<sphere>(center, center2, 0.2, sphere_material));
+
         } else if (choose_mat < 0.95) {
           // metal, 金属材质, 反射光线在理想反射光线方向存在散射(漫反射)和衰减
           auto albedo = color::random(0.5, 1);
@@ -59,8 +62,8 @@ int main() {
   camera cam;
   cam.aspect_ratio = 16.0 / 9.0;  // 图像的长宽比
   cam.image_width = 400;          // 图像的宽(像素数)
-  cam.samples_per_pixel = 5;      // 每个像素的采样光线数
-  cam.max_depth = 10;             // 光线的最大深度
+  cam.samples_per_pixel = 100;    // 每个像素的采样光线数
+  cam.max_depth = 50;             // 光线的最大深度
 
   cam.vfov = 20;                    // 视场角
   cam.lookfrom = point3(13, 2, 3);  // 相机位置

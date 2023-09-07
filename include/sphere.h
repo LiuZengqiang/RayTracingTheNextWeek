@@ -22,7 +22,12 @@
 class sphere : public hittable {
  public:
   sphere(point3 _center, double _radius, shared_ptr<material> _material)
-      : center(_center), radius(_radius), mat(_material) {}
+      : center1(_center), radius(_radius), mat(_material), is_moving(false) {}
+  sphere(point3 _center1, point3 _center2, double _radius,
+         shared_ptr<material> _material)
+      : center1(_center1), radius(_radius), mat(_material), is_moving(true) {
+    center_vec = _center2 - _center1;
+  }
 
   /**
    * @brief 根据 球与射线的相交公式 计算光线是否与球相交, 详细公式推导过程见
@@ -37,6 +42,7 @@ class sphere : public hittable {
    * @return false
    */
   bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
+    point3 center = is_moving ? (sphere_center(r.time())) : (center1);
     vec3 oc = r.origin() - center;
     auto a = r.direction().length_squared();
     auto half_b = dot(oc, r.direction());
@@ -70,9 +76,15 @@ class sphere : public hittable {
   }
 
  private:
-  point3 center;             // 球的中点
+  point3 center1;            // 球的0时刻中心点
   double radius;             // 球的半径
   shared_ptr<material> mat;  // 球的表面材料
+  bool is_moving;            // 球是否可以运行
+  vec3 center_vec;           // 球的运动方向
+  // 计算time时刻的球的中心点
+  point3 sphere_center(double time) const {
+    return center1 + time * center_vec;
+  }
 };
 
 #endif
