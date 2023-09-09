@@ -13,6 +13,7 @@
 #include "color.h"
 #include "hittable.h"
 #include "rtweekend.h"
+#include "texture.h"
 
 class hit_record;
 /**
@@ -35,6 +36,8 @@ class material {
    */
   virtual bool scatter(const ray& r_in, const hit_record& rec,
                        color& attenuation, ray& scattered) const = 0;
+
+  shared_ptr<texture> tex;
 };
 
 /**
@@ -46,6 +49,7 @@ class material {
 class lambertian : public material {
  public:
   lambertian(const color& a) : albedo(a) {}
+  lambertian(shared_ptr<texture> _texture) { this->tex = _texture; };
 
   bool scatter(const ray& r_in, const hit_record& rec, color& attenuation,
                ray& scattered) const override {
@@ -55,7 +59,12 @@ class lambertian : public material {
     }
 
     scattered = ray(rec.p, scatter_direction, r_in.time());
-    attenuation = albedo;
+    // if (tex) {
+    //   attenuation = tex->value(0, 0, rec.p);
+    // } else {
+    //   attenuation = albedo;
+    // }
+    attenuation = (tex) ? (tex->value(0, 0, rec.p)) : (albedo);
     return true;
   }
 

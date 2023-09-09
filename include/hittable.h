@@ -27,7 +27,9 @@ class hit_record {
   vec3 normal;
   shared_ptr<material> mat;  // 交点处材料属性
   double t;                  // 光线的传播距离
-  bool front_face;           // 该交点是否是物体的外表面
+  double u;                  // 用于计算纹理的坐标参数(u,v)
+  double v;
+  bool front_face;  // 该交点是否是物体的外表面
   /**
    * @brief 设置该交点是否是物体的外表面
    *
