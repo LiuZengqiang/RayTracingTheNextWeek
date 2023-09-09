@@ -55,6 +55,8 @@ class checker_texture : public texture {
     auto zInteger = static_cast<int>(std::floor(inv_scale * p.z()));
     // 得到一个网格类型的纹理
     bool isEven = (xInteger + yInteger + zInteger) % 2 == 0;
+    // 尝试使用参数 u,v
+    isEven = static_cast<int>(u * 100 + v * 100) % 2;
 
     return isEven ? even->value(u, v, p) : odd->value(u, v, p);
   }
