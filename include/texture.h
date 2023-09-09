@@ -10,7 +10,7 @@
  */
 #ifndef TEXTURE_H
 #define TEXTURE_H
-
+#include "perlin.h"
 #include "rtw_stb_image.h"
 #include "rtweekend.h"
 
@@ -96,5 +96,21 @@ class image_texture : public texture {
 
  private:
   rtw_image image;
+};
+
+// perlin noise 纹理类
+class noise_texture : public texture {
+ public:
+  noise_texture() {}
+  noise_texture(double sc) : scale(sc) {}
+
+  color value(double u, double v, const point3& p) const override {
+    return color(1, 1, 1) * 0.5 *
+           (1 + sin(scale * p.z() + 10 * noise.turb(scale * p)));
+  }
+
+ private:
+  perlin noise;  // perlin noise 对象
+  double scale;  // 用于调整 noise 块大小的参数
 };
 #endif
