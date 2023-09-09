@@ -11,7 +11,9 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
+#include "rtw_stb_image.h"
 #include "rtweekend.h"
+
 // 纹理类
 class texture {
  public:
@@ -65,5 +67,34 @@ class checker_texture : public texture {
   double inv_scale;
   shared_ptr<texture> even;
   shared_ptr<texture> odd;
+};
+
+// 图片纹理类
+class image_texture : public texture {
+ public:
+  image_texture(const char* filename) : image(filename) {}
+
+  // 获取图片 image 在二维局部坐标(u,v)下的颜色值
+  color value(double u, double v, const point3& p) const override {
+    // If we have no texture data, then return solid cyan as a debugging aid.
+    if (image.height() <= 0) return color(0, 1, 1);
+
+    // Clamp input texture coordinates to [0,1] x [1,0]
+
+    // 计算(u,v)坐标
+    u = interval(0, 1).clamp(u);
+    v = 1.0 - interval(0, 1).clamp(v);  // Flip V to image coordinates
+
+    auto i = static_cast<int>(u * image.width());
+    auto j = static_cast<int>(v * image.height());
+    auto pixel = image.pixel_data(i, j);
+
+    auto color_scale = 1.0 / 255.0;
+    return color(color_scale * pixel[0], color_scale * pixel[1],
+                 color_scale * pixel[2]);
+  }
+
+ private:
+  rtw_image image;
 };
 #endif

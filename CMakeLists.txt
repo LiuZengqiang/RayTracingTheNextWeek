@@ -3,4 +3,6 @@ project(RayTracingTheNextWeek VERSION 0.1.0 LANGUAGES C CXX)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
+
 add_executable(RayTracingTheNextWeek main.cpp)
+
