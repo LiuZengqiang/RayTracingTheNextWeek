@@ -3,10 +3,7 @@
 ### 运行：
 ```shell
 mkdir build
-cd build
-cmake ..
-make
-./RayTracingTheNextWeek > image.ppm
+./run.sh
 ```
-运行完成后结果将存储在文件``/build/image.ppm``。  
+运行完成后结果将存储在``/build/image.ppm``。  
 ### 示例结果：  
