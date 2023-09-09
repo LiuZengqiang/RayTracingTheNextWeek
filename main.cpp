@@ -1,7 +1,9 @@
 #include <float.h>
+#include <time.h>
 
 #include <iostream>
 
+#include "bvh.h"
 #include "camera.h"
 #include "color.h"
 #include "hittable_list.h"
@@ -58,6 +60,13 @@ int main() {
   auto material3 = make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
   world.add(make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
 
+  // 根据 world 构建 bvh
+  // hittable_list 和 bvh_node 都是一种 hittable,
+  // 因此可以使用hittable_list(world) 构建 bvh_node(bvh的根节点)
+  // 然后将 bvh_node 赋值给 world
+
+  world = hittable_list(make_shared<bvh_node>(world));
+
   /* 设置相机和输出图像的属性 */
   camera cam;
   cam.aspect_ratio = 16.0 / 9.0;  // 图像的长宽比
@@ -72,8 +81,11 @@ int main() {
 
   cam.defocus_angle = 0.6;  // 模拟实际相机的散射角度(以实现景深效果)
   cam.focus_dist = 10.0;  // 模拟实际相机的理想焦距(以实现景深效果)
-
+  auto start = clock();
   cam.render(world);
+  auto finish = clock();
+  std::clog << "Elapsed:" << (double)(finish - start) / (CLOCKS_PER_SEC)
+            << "\n";
 
   return 0;
 }

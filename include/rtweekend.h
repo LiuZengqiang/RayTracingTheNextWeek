@@ -42,6 +42,10 @@ inline double random_double() {
 inline double random_double(double min, double max) {
   return min + (max - min) * random_double();
 }
+inline int random_int(int min, int max) {
+  // Returns a random integer in [min,max].
+  return static_cast<int>(random_double(min, max + 1));
+}
 
 // Common Headers
 // #include "interval.h" 必须放在这个位置，因为 interval.h 需要 infinity 常量

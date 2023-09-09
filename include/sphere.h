@@ -21,11 +21,22 @@
  */
 class sphere : public hittable {
  public:
+  // 如果构造参数只有一个 center, 说明该 sphere 是静止的
   sphere(point3 _center, double _radius, shared_ptr<material> _material)
-      : center1(_center), radius(_radius), mat(_material), is_moving(false) {}
+      : center1(_center), radius(_radius), mat(_material), is_moving(false) {
+    // 静态 sphere 的 bounding_box 比较容易计算
+    auto rvec = vec3(radius, radius, radius);
+    bbox = aabb(center1 - rvec, center1 + rvec);
+  }
+  // 如果构造参数有两个 center, 说明该 sphere 有可能会运动
   sphere(point3 _center1, point3 _center2, double _radius,
          shared_ptr<material> _material)
       : center1(_center1), radius(_radius), mat(_material), is_moving(true) {
+    // 对于动态的 sphere, 构造一个包围盒可以容纳t=[0,1]时刻的sphere
+    auto rvec = vec3(radius, radius, radius);
+    aabb box1 = aabb(_center1 - rvec, _center1 + rvec);
+    aabb box2 = aabb(_center1 - rvec, _center1 + rvec);
+    bbox = aabb(box1, box2);
     center_vec = _center2 - _center1;
   }
 
@@ -75,12 +86,15 @@ class sphere : public hittable {
     return true;
   }
 
+  aabb bounding_box() const override { return bbox; }
+
  private:
   point3 center1;            // 球的0时刻中心点
   double radius;             // 球的半径
   shared_ptr<material> mat;  // 球的表面材料
   bool is_moving;            // 球是否可以运行
   vec3 center_vec;           // 球的运动方向
+  aabb bbox;                 // 球的包围盒
   // 计算time时刻的球的中心点
   point3 sphere_center(double time) const {
     return center1 + time * center_vec;

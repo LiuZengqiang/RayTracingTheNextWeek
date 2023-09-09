@@ -18,9 +18,13 @@
 class interval {
  public:
   double min, max;
+  // 默认的 interval 为空
   interval() : min(+infinity), max(-infinity) {}  // Default interval is empty
 
   interval(double _min, double _max) : min(_min), max(_max) {}
+
+  interval(const interval& a, const interval& b)
+      : min(fmin(a.min, b.min)), max(fmax(a.max, b.max)) {}
   // 判断 x 是否在目标范围内部(包含边界)
   bool contains(double x) const { return min <= x && x <= max; }
   // 判断 x 是否在目标范围内部(不包含边界)
@@ -30,6 +34,11 @@ class interval {
     if (x < min) return min;
     if (x > max) return max;
     return x;
+  }
+  double size() const { return max - min; }
+  interval expand(double delta) const {
+    auto padding = delta / 2.0;
+    return interval(min - padding, max + padding);
   }
 
   static const interval empty, universe;

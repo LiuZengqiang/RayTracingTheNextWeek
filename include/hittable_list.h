@@ -29,7 +29,11 @@ class hittable_list : public hittable {
 
   void clear() { objects.clear(); }
 
-  void add(shared_ptr<hittable> object) { objects.push_back(object); }
+  void add(shared_ptr<hittable> object) {
+    objects.push_back(object);
+    // 更新 bbox
+    bbox = aabb(bbox, object->bounding_box());
+  }
   /**
    * @brief 计算光线与物体的交点(第一个交点), 有交点则返回true,
    * 没有交点返回false
@@ -54,6 +58,10 @@ class hittable_list : public hittable {
     }
     return hit_anything;
   }
+  aabb bounding_box() const override { return bbox; }
+
+ private:
+  aabb bbox;
 };
 
 #endif

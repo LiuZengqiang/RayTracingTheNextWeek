@@ -11,6 +11,7 @@
 #ifndef HITTABLE_H
 #define HITTABLE_H
 
+#include "aabb.h"
 #include "ray.h"
 #include "rtweekend.h"
 
@@ -48,6 +49,8 @@ class hittable {
   // =default 关键字令编译器自动生成默认的构造函数
   virtual ~hittable() = default;
   virtual bool hit(const ray& r, interval ray_t, hit_record& rec) const = 0;
+  // 该 hittable 的包围盒
+  virtual aabb bounding_box() const = 0;
 };
 
 #endif
