@@ -22,7 +22,6 @@
 #include <cstdlib>
 #include <iostream>
 
-// #include "external/stb_image.h"
 #include "external/stb_image.h"
 
 class rtw_image {

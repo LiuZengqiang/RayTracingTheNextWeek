@@ -21,10 +21,7 @@ void random_spheres() {
   /* 生成场景 */
   hittable_list world;
   auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
-  auto checker =
-      make_shared<checker_texture>(0.32, color(.2, .3, .1), color(.9, .9, .9));
-  world.add(make_shared<sphere>(point3(0, -1000, 0), 1000,
-                                make_shared<lambertian>(checker)));
+  world.add(make_shared<sphere>(point3(0, -1000, 0), 1000, ground_material));
 
   for (int a = -11; a < 11; a++) {
     for (int b = -11; b < 11; b++) {
@@ -65,13 +62,6 @@ void random_spheres() {
 
   auto material3 = make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
   world.add(make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
-
-  // 根据 world 构建 bvh
-  // hittable_list 和 bvh_node 都是一种 hittable,
-  // 因此可以使用hittable_list(world) 构建 bvh_node(bvh的根节点)
-  // 然后将 bvh_node 赋值给 world
-
-  world = hittable_list(make_shared<bvh_node>(world));
 
   /* 设置相机和输出图像的属性 */
   camera cam;
@@ -429,36 +419,54 @@ void final_scene(int image_width, int samples_per_pixel, int max_depth) {
   cam.render(world);
 }
 
-int main() {
-  switch (3) {
+int main(int argc, char** argv) {
+  if (argc < 1) {
+    std::clog << "请输入要生成的场景参数id[1-9]."
+              << "\n"
+              << "例如: ./RayTracingTheNextWeek 1 > image.ppm"
+              << "\n";
+    return -1;
+  }
+  int scene_id = int(argv[1][0] - '0');
+  switch (scene_id) {
     case 1:
+      // 随机场景
       random_spheres();
       break;
     case 2:
+      // 网格纹理
       two_spheres();
       break;
     case 3:
+      // 地球image纹理
       earth();
       break;
     case 4:
+      // perlin noise纹理
       two_perlin_spheres();
       break;
     case 5:
+      // 四边形
       quads();
       break;
     case 6:
+      // 光源
       simple_light();
       break;
     case 7:
+      // 基础 cornell box
       cornell_box();
       break;
     case 8:
+      // 带有烟雾材质的 cornell box
       cornell_smoke();
       break;
     case 9:
+      // 最终的场景
       final_scene(800, 10000, 40);
       break;
     default:
+      // 最终的场景
       final_scene(400, 250, 4);
       break;
   }

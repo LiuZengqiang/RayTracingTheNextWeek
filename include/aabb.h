@@ -1,7 +1,7 @@
 /**
  * @file aabb.h
  * @author Liuzengqiang (12021032@zju.edu.cn)
- * @brief
+ * @brief aabb 包围盒 类
  * @version 0.1
  * @date 2023-09-09
  *
@@ -13,14 +13,17 @@
 
 #include "rtweekend.h"
 
-// aabb 包围盒 类
+/**
+ * @brief AABB 包围盒类
+ *
+ */
 class aabb {
  public:
+  // AABBA包围盒在x,y,z三个维度上的间距
   interval x, y, z;
 
   aabb() {}  // The default AABB is empty, since intervals are empty by default.
 
-  // 三维包围盒范围
   aabb(const interval& ix, const interval& iy, const interval& iz)
       : x(ix), y(iy), z(iz) {}
   // 使用两个点构造三维包围盒
@@ -31,7 +34,7 @@ class aabb {
     y = interval(fmin(a[1], b[1]), fmax(a[1], b[1]));
     z = interval(fmin(a[2], b[2]), fmax(a[2], b[2]));
   }
-  // 使用两个 box 构造, 该box可以包含这两个 box
+  // 使用两个 AABB包围盒 构造
   aabb(const aabb& box0, const aabb& box1) {
     x = interval(box0.x, box1.x);
     y = interval(box0.y, box1.y);
@@ -79,10 +82,9 @@ class aabb {
   }
 };
 
-// aabb 包围盒偏移运算
+// aabb包围盒平移运算
 aabb operator+(const aabb& bbox, const vec3& offset) {
   return aabb(bbox.x + offset.x(), bbox.y + offset.y(), bbox.z + offset.z());
 }
-
 aabb operator+(const vec3& offset, const aabb& bbox) { return bbox + offset; }
 #endif

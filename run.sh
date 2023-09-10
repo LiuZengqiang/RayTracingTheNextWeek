@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
 cd ./build/
-cmake .. && make && ./RayTracingTheNextWeek > image.ppm
+cmake .. && make && ./RayTracingTheNextWeek 1 > image.ppm
 cd ..
 

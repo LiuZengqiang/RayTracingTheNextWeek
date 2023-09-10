@@ -12,7 +12,10 @@
 #define PERLIN_H
 
 #include "rtweekend.h"
-// 这里的实现似乎跟 网上给出的 perlin noise 不太一样
+/**
+ * @brief perlin noise 类
+ *
+ */
 class perlin {
  public:
   perlin() {
@@ -32,9 +35,9 @@ class perlin {
     delete[] perm_y;
     delete[] perm_z;
   }
+
   // 改函数给出一个随机的 perlin noise 随机数, 在(0,1)范围内
   double noise(const point3& p) const {
-    // p 的小数部分
     auto u = p.x() - floor(p.x());
     auto v = p.y() - floor(p.y());
     auto w = p.z() - floor(p.z());
@@ -59,8 +62,13 @@ class perlin {
 
     return perlin_interp(c, u, v, w);
   }
-  // turbulence
-  // 使用多个 perlin noise 产生紊流的效果
+  /**
+   * @brief turbulence, 使用多个 perlin noise 产生紊流的效果
+   *
+   * @param p
+   * @param depth
+   * @return double
+   */
   double turb(const point3& p, int depth = 7) const {
     auto accum = 0.0;
     auto temp_p = p;
@@ -100,7 +108,16 @@ class perlin {
       p[target] = tmp;
     }
   }
-  // 插值函数, 用于平滑
+  
+  /**
+   * @brief 插值函数, 用于平滑
+   * 
+   * @param c 
+   * @param u 
+   * @param v 
+   * @param w 
+   * @return double 
+   */
   static double perlin_interp(vec3 c[2][2][2], double u, double v, double w) {
     auto uu = u * u * (3 - 2 * u);
     auto vv = v * v * (3 - 2 * v);

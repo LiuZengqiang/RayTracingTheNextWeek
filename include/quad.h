@@ -15,9 +15,10 @@
 #include "hittable_list.h"
 #include "rtweekend.h"
 
-// 与 sphere 类似，都需要继承 hittable 类
-// 因此需要 重载实现 bounding_box() 和 hit() 两个函数
-// quad 是平行四边形 (是一个平面), 因此其 bbox 需要通过 pad() 扩大其包围盒
+/**
+ * @brief 平行四边形类
+ *
+ */
 class quad : public hittable {
  public:
   quad(const point3& _Q, const vec3& _u, const vec3& _v, shared_ptr<material> m)
@@ -88,7 +89,7 @@ class quad : public hittable {
   }
 };
 
-// 根据两个点 构造一个六面体
+// 根据两个点构造一个六面体
 inline shared_ptr<hittable_list> box(const point3& a, const point3& b,
                                      shared_ptr<material> mat) {
   // Returns the 3D box (six sides) that contains the two opposite vertices a &

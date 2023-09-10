@@ -55,24 +55,26 @@ class hittable {
   virtual aabb bounding_box() const = 0;
 };
 
-// 对物体进行 translate 的包装类
-// 构造函数必须为一个实体 hittable 对象
+/**
+ * @brief 对物体进行 translate 的包装类
+ *
+ */
 class translate : public hittable {
  public:
   translate(shared_ptr<hittable> p, const vec3& displacement)
       : object(p), offset(displacement) {
-    // 包围盒 进行一个偏移
-    // 包围盒 用在 构建 BVH 树中, 必须保证 包围盒在世界坐标系下是正确的
+    // 对 包围盒 进行偏移, 包围盒用在构建 BVH 树中,
+    // 必须保证包围盒在世界坐标系下是正确的
     bbox = object->bounding_box() + offset;
   }
 
   bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
     // Move the ray backwards by the offset
-    // 物体偏移 相当于 入射光进行反向偏移
-    // 这里之所以可以这样操作是因为 此处的 hit() 函数只用于计算 r 与该
-    // 对象的碰撞, 不考虑 r 与场景中其他 hittable 的碰撞, 假如在该 hittable
-    // 之前存在某个物体遮挡了该物体, 那么要么程序不会到达这里, 要么 此处的交点
-    // 会被更近的交点替换
+    // 物体偏移相当于入射光进行反向偏移
+    // 之所以可以这样操作是因为:
+    // 此处的 hit() 函数只用于计算(只关心)光线 r 与该物体的碰撞,
+    // 不考虑 r 与场景中其他物体的碰撞, 假如该物体的前面存在某个其他物体
+    // 遮挡了该物体, 那么要么程序不会到达这里, 要么此处的交点会被更近的交点替换
     ray offset_r(r.origin() - offset, r.direction(), r.time());
 
     // Determine where (if any) an intersection occurs along the offset ray
@@ -92,9 +94,11 @@ class translate : public hittable {
   aabb bbox;
 };
 
-// 绕着 Y 轴旋转
-// 在构建场景时 必须先 rotate 再 translate
-// 因为 rotaet 要求物体中心再 (0,0,0)
+/**
+ * @brief 对物体进行 totate 的包装类
+ * 在构建场景时 必须先 rotate 再 translate
+ *
+ */
 class rotate_y : public hittable {
  public:
   rotate_y(shared_ptr<hittable> p, double angle) : object(p) {
@@ -148,16 +152,14 @@ class rotate_y : public hittable {
     if (!object->hit(rotated_r, ray_t, rec)) return false;
 
     // Change the intersection point from object space to world space
-    // 将计算得到的 交点(局部坐标系) 转到世界坐标系
+    // 将计算得到的交点局部坐标系转到世界坐标系
     auto p = rec.p;
     p[0] = cos_theta * rec.p[0] + sin_theta * rec.p[2];
     p[2] = -sin_theta * rec.p[0] + cos_theta * rec.p[2];
 
     // Change the normal from object space to world space
-    // NOTE:: 漏掉了 ';' 符号
     auto normal = rec.normal;
-    normal[0] =
-        cos_theta * rec.normal[0] + sin_theta * rec.normal[2];
+    normal[0] = cos_theta * rec.normal[0] + sin_theta * rec.normal[2];
     normal[2] = -sin_theta * rec.normal[0] + cos_theta * rec.normal[2];
 
     rec.p = p;

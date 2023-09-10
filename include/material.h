@@ -140,7 +140,10 @@ class dielectric : public material {
   }
 };
 
-// 发射漫反射光源的材料属性
+/**
+ * @brief 发射光源的材料类
+ *
+ */
 class diffuse_light : public material {
  public:
   diffuse_light(shared_ptr<texture> a) : emit(a) {}
@@ -159,7 +162,10 @@ class diffuse_light : public material {
   shared_ptr<texture> emit;  // 发出的光
 };
 
-// 各向同性的内部属性
+/**
+ * @brief 各向同性的类似于烟雾的材料类
+ *
+ */
 class isotropic : public material {
  public:
   isotropic(color c) : albedo(make_shared<solid_color>(c)) {}
@@ -167,7 +173,7 @@ class isotropic : public material {
 
   bool scatter(const ray& r_in, const hit_record& rec, color& attenuation,
                ray& scattered) const override {
-    // 在单位球上均匀采样
+    // 反射光线在一个单元球内均匀的分布
     scattered = ray(rec.p, random_unit_vector(), r_in.time());
     attenuation = albedo->value(rec.u, rec.v, rec.p);
     return true;

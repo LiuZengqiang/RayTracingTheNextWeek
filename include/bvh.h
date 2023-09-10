@@ -16,11 +16,10 @@
 #include "hittable_list.h"
 #include "rtweekend.h"
 
-// BVH(树/节点) 类
-// 每个节点都有一个 bbox,
-// 但是只有 叶子节点里面存放物体
-// bvh_node 也是 hittable 的子类
-// NOTE:如果场景为空怎么办？代码中没有给出处理
+/**
+ * @brief BVH 类,
+ * 每个节点都是一个 hittable 的子类, 但是只有叶子节点里面存放实际的物体
+ */
 class bvh_node : public hittable {
  public:
   bvh_node(const hittable_list& list)
@@ -31,18 +30,22 @@ class bvh_node : public hittable {
     auto objects =
         src_objects;  // Create a modifiable array of the source scene objects
 
-    // 随机选择一个对比轴
+    // 随机选择一个对比轴进行划分
     int axis = random_int(0, 2);
     auto comparator = (axis == 0)   ? box_x_compare
                       : (axis == 1) ? box_y_compare
                                     : box_z_compare;
 
     size_t object_span = end - start;
-    if (object_span == 1) {
-      // 如果只有一个物体那么 left 和 right 都指向同一个 物体
+    if (object_span == 0) {
+      // 如果没有物体, 那么 left 和 right 都为 null
+      // 父亲节点的bbox为空(默认), 不与任何光线相交
+      return;
+    } else if (object_span == 1) {
+      // 如果只有一个物体, 那么 left 和 right 都指向同一个物体
       left = right = objects[start];
     } else if (object_span == 2) {
-      // 如果有两个物体，那么 left 和 right 左右各一个
+      // 如果有两个物体, 那么 left 和 right 左右各一个
       if (comparator(objects[start], objects[start + 1])) {
         left = objects[start];
         right = objects[start + 1];
@@ -51,7 +54,7 @@ class bvh_node : public hittable {
         right = objects[start];
       }
     } else {
-      // 先按照 某维度 将物体排序
+      // 先按照某维度将物体排序
       std::sort(objects.begin() + start, objects.begin() + end, comparator);
 
       auto mid = start + object_span / 2;
@@ -63,14 +66,21 @@ class bvh_node : public hittable {
     // 根据左右节点的 bbox 更新本节点的 bbox
     bbox = aabb(left->bounding_box(), right->bounding_box());
   }
-  // 判断光线是否 与本 bvh 树中的某个物体在合法范围内相交
-  // 如果相交返回true， 并将交点为信息存储在 rec 中
+
+  /**
+   * @brief 判断光线是否与 bvh 树中的某个物体在合法范围内相交,如果相交返回true，
+   * 并将交点为信息存储在 rec 中
+   * @param r 入射光线
+   * @param ray_t 入射光线的合法范围
+   * @param rec 如果存在合法的交点, rec内部存储交点信息
+   * @return true
+   * @return false
+   */
   bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
-    // NOTE: 这里是 bbox 不是box 吧？
     if (!bbox.hit(r, ray_t)) return false;
 
     // 深度搜索(递归), 不断搜索节点 bvh_node 的孩子节点
-    // 直到与node没有相交或者直到叶子节点
+    // 直到与 bvh_node 没有相交或者直到叶子节点
     bool hit_left = left->hit(r, ray_t, rec);
     bool hit_right =
         right->hit(r, interval(ray_t.min, hit_left ? rec.t : ray_t.max), rec);
@@ -85,7 +95,7 @@ class bvh_node : public hittable {
   shared_ptr<hittable> right;
   aabb bbox;
 
-  // 按照 某维度 进行比较的函数
+  // 按照某维度进行比较的函数
   static bool box_compare(const shared_ptr<hittable> a,
                           const shared_ptr<hittable> b, int axis_index) {
     return a->bounding_box().axis(axis_index).min <
