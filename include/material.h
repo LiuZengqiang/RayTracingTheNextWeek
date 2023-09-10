@@ -17,7 +17,8 @@
 
 class hit_record;
 /**
- * @brief 材料类, 所有特定的材料都必须继承该类并实现其中的 scatter() 函数
+ * @brief 材料类, 所有特定的材料都必须继承该类并实现其中的
+ * scatter() 函数, 如果材料有自发光可以重载 emitted() 函数
  *
  */
 class material {
@@ -36,6 +37,9 @@ class material {
    */
   virtual bool scatter(const ray& r_in, const hit_record& rec,
                        color& attenuation, ray& scattered) const = 0;
+  virtual color emitted(double u, double v, const point3& p) const {
+    return color(0, 0, 0);
+  }
 };
 
 /**
@@ -136,4 +140,40 @@ class dielectric : public material {
   }
 };
 
+// 发射漫反射光源的材料属性
+class diffuse_light : public material {
+ public:
+  diffuse_light(shared_ptr<texture> a) : emit(a) {}
+  diffuse_light(color c) : emit(make_shared<solid_color>(c)) {}
+
+  bool scatter(const ray& r_in, const hit_record& rec, color& attenuation,
+               ray& scattered) const override {
+    return false;
+  }
+
+  color emitted(double u, double v, const point3& p) const override {
+    return emit->value(u, v, p);
+  }
+
+ private:
+  shared_ptr<texture> emit;  // 发出的光
+};
+
+// 各向同性的内部属性
+class isotropic : public material {
+ public:
+  isotropic(color c) : albedo(make_shared<solid_color>(c)) {}
+  isotropic(shared_ptr<texture> a) : albedo(a) {}
+
+  bool scatter(const ray& r_in, const hit_record& rec, color& attenuation,
+               ray& scattered) const override {
+    // 在单位球上均匀采样
+    scattered = ray(rec.p, random_unit_vector(), r_in.time());
+    attenuation = albedo->value(rec.u, rec.v, rec.p);
+    return true;
+  }
+
+ private:
+  shared_ptr<texture> albedo;
+};
 #endif

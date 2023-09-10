@@ -44,7 +44,15 @@ class interval {
   static const interval empty, universe;
 };
 // 全局静态范围, empty 空范围, universe 正负无限范围
-const static interval empty(+infinity, -infinity);
-const static interval universe(-infinity, +infinity);
+const interval interval::empty = interval(+infinity, -infinity);
+const interval interval::universe = interval(-infinity, +infinity);
 
+// interval 运算
+interval operator+(const interval& ival, double displacement) {
+  return interval(ival.min + displacement, ival.max + displacement);
+}
+
+interval operator+(double displacement, const interval& ival) {
+  return ival + displacement;
+}
 #endif

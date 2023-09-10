@@ -25,6 +25,7 @@ class camera {
   int image_width = 400;             // 图像的宽(像素数)
   int samples_per_pixel = 100;       // 每个像素的采样光线数
   int max_depth = 10;                // 光线的最大深度(反射次数)
+  color background = color(0.7, 0.8, 1.0);  // 场景的背景颜色
 
   double vfov = 90;  // 视场角
 
@@ -145,15 +146,23 @@ class camera {
     // 如果击中场景中的某个物体
     // 忽略距离在[0,0.001)范围内的交点，避免浮点运算误差
     if (world.hit(r, interval(0.001, infinity), rec)) {
-      // 反射光线
+      // 物体反射光线
       ray scattered;
-      // 反射光线的衰减
+      // 物体材质颜色
       color attenuation;
+      // 物体自发光
+      color color_from_emission = rec.mat->emitted(rec.u, rec.v, rec.p);
       if (rec.mat->scatter(r, rec, attenuation, scattered)) {
-        return attenuation * ray_color(scattered, depth - 1, world);
+        // 如果材料存在反射, 则返回 自发光+物体颜色*反射光
+        return color_from_emission +
+               attenuation * ray_color(scattered, depth - 1, world);
       } else {
-        return color(0, 0, 0);
+        // 如果材料不存在反射, 则返回 自发光
+        return color_from_emission;
       }
+    } else {
+      // 如果没有击中场景中的物体, 则返回场景背景
+      return background;
     }
 
     // 如果没有击中场景中的物体，就假设击中天空，天空的颜色是一个偏向于蓝色的随机值
