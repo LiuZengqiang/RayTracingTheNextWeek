@@ -421,9 +421,9 @@ void final_scene(int image_width, int samples_per_pixel, int max_depth) {
 
 int main(int argc, char** argv) {
   if (argc < 1) {
-    std::clog << "请输入要生成的场景参数id[1-9]."
+    std::clog << "请输入要生成的场景参数id[0-9]."
               << "\n"
-              << "例如: ./RayTracingTheNextWeek 1 > image.ppm"
+              << "例如: ./RayTracingTheNextWeek 0 > image.ppm"
               << "\n";
     return -1;
   }
