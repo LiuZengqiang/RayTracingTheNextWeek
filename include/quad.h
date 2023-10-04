@@ -37,32 +37,34 @@ class quad : public hittable {
   aabb bounding_box() const override { return bbox; }
 
   bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
-    auto denom = dot(normal, r.direction());
-    // 如果 r 与该平面的法向平行, 说明没有交点
-    if (fabs(denom) < 1e-8) {
-      return false;
-    }
-    // 计算相交点的 t
-    auto t = (D - dot(normal, r.origin())) / denom;
-    // 如果 t 不在合法区间内, 说明没有交点
-    if (!ray_t.contains(t)) {
-      return false;
-    }
-    auto intersection = r.at(t);
+    // 尝试使用 Moller-Trumbore 方法求交点
+    vec3 e1 = u;
+    vec3 e2 = v;
+    vec3 P = cross(r.direction(), e2);
+    vec3 T = r.origin() - Q;
+    vec3 QQ = cross(T, e1);
 
-    vec3 planar_hitpt_vector = intersection - Q;
-    // 如果参数 alpha, beta 都在 [0,1] 范围内部, 说明交点在四边形内
-    auto alpha = dot(w, cross(planar_hitpt_vector, v));
-    auto beta = dot(w, cross(u, planar_hitpt_vector));
-    if (!is_interior(alpha, beta, rec)) {
-      return false;
-    }
+    float det = dot(P, e1);
 
-    rec.t = t;
-    rec.p = intersection;
-    rec.mat = mat;
-    rec.set_face_normal(r, normal);
-    return true;  // To be implemented
+    float uu = dot(T, P);
+    float vv = dot(r.direction(), QQ);
+    float t = dot(e2, QQ);
+    float f_inv_det = 1.0f / det;
+    t *= f_inv_det;
+    uu *= f_inv_det;
+    vv *= f_inv_det;
+    if (ray_t.contains(t) && uu >= 0 && vv >= 0 && uu <= 1.0 && vv <= 1.0) {
+      auto intersection = r.at(t);
+
+      rec.u = uu;
+      rec.v = vv;
+      rec.t = t;
+      rec.p = intersection;
+      rec.mat = mat;
+      rec.set_face_normal(r, normal);
+      return true;  // To be implemented
+    }
+    return false;
   }
 
  private:
@@ -92,8 +94,8 @@ class quad : public hittable {
 // 根据两个点构造一个六面体
 inline shared_ptr<hittable_list> box(const point3& a, const point3& b,
                                      shared_ptr<material> mat) {
-  // Returns the 3D box (six sides) that contains the two opposite vertices a &
-  // b.
+  // Returns the 3D box (six sides) that contains the two opposite vertices a
+  // & b.
 
   auto sides = make_shared<hittable_list>();
 
