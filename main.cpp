@@ -429,45 +429,52 @@ int main(int argc, char** argv) {
   }
   int scene_id = int(argv[1][0] - '0');
   switch (scene_id) {
-    case 1:
+    case 0:
       // 随机场景
       random_spheres();
       break;
-    case 2:
+    case 1:
       // 网格纹理
       two_spheres();
       break;
-    case 3:
+    case 2:
       // 地球image纹理
       earth();
       break;
-    case 4:
+    case 3:
       // perlin noise纹理
       two_perlin_spheres();
       break;
-    case 5:
+    case 4:
       // 四边形
       quads();
       break;
-    case 6:
+    case 5:
       // 光源
       simple_light();
       break;
-    case 7:
+    case 6:
       // 基础 cornell box
       cornell_box();
       break;
-    case 8:
+    case 7:
       // 带有烟雾材质的 cornell box
       cornell_smoke();
       break;
-    case 9:
+    case 8:
       // 最终的场景
       final_scene(800, 10000, 40);
       break;
-    default:
+    case 9:
       // 最终的场景
       final_scene(400, 250, 4);
       break;
+    default:
+      std::clog << "场景参数id需要在[0,9]之内."
+                << "\n"
+                << "例如: ./RayTracingTheNextWeek 0 > image.ppm"
+                << "\n";
+      return -1;
   }
+  return 0;
 }
